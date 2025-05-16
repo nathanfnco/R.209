@@ -35,6 +35,7 @@ postalCodeInput.addEventListener("input", async () => {
   }
 });
 
+// Gestion de la soumission du formulaire et affichage météo
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -69,30 +70,27 @@ form.addEventListener("submit", async (e) => {
       const year = date.getFullYear();
       const formattedDate = `${dayName} ${dayNumber} <span class="mois">${monthName}</span> ${year}`;
 
-      // Sélection de l'icône météo dynamique
+      // Choix icône météo dynamique
       let iconSrc = "images/unknown.jpg"; // Par défaut
-      if (day.weather >= 0 && day.weather <= 3) {
-        iconSrc = "images/sun.jpg"; // Soleil
-      } else if ((day.weather >= 4 && day.weather <= 7) || day.weather === 10) {
-        iconSrc = "images/nuage.jpg"; // Nuageux
-      } else if ((day.weather >= 8 && day.weather <= 14) || (day.weather >= 40 && day.weather <= 48)) {
-        iconSrc = "images/pluie.jpg"; // Pluie
-      }
+      if (day.weather >= 0 && day.weather <= 3) iconSrc = "images/sun.jpg"; // Soleil
+      else if ((day.weather >= 4 && day.weather <= 7) || day.weather === 10) iconSrc = "images/nuage.jpg"; // Nuageux
+      else if ((day.weather >= 8 && day.weather <= 14) || (day.weather >= 40 && day.weather <= 48)) iconSrc = "images/pluie.jpg"; // Pluie
+
       card.innerHTML = `
-      <div style="text-align: center;">
-      <img src="${iconSrc}" alt="Icône météo" style="width: 120px; height: 120px;" />
-      </div>
-      <h3>Jour ${index + 1} - ${formattedDate}</h3>
-      <p><strong>T° min :</strong> ${day.tmin}°C</p>
-      <p><strong>T° max :</strong> ${day.tmax}°C</p>
-      <p><strong>Pluie :</strong> ${day.probarain}%</p>
-      <p><strong>Ensoleillement :</strong> ${day.sun_hours}h</p>
-      ${showLat ? `<p><strong>Latitude :</strong> ${lat.toFixed(4)}</p>` : ""}
-      ${showLon ? `<p><strong>Longitude :</strong> ${lon.toFixed(4)}</p>` : ""}
-      ${showRain ? `<p><strong>Cumul pluie :</strong> ${day.rr10} mm</p>` : ""}
-      ${showWind ? `<p><strong>Vent moyen :</strong> ${day.wind10m} km/h</p>` : ""}
-      ${showDir ? `<p><strong>Direction vent :</strong> ${day.dirwind10m}°</p>` : ""}
-      ${showFog ? `<p><strong>Probabilité de brouillard :</strong> ${day.probafog}%</p>` : ""}
+        <div style="text-align: center;">
+          <img src="${iconSrc}" alt="Icône météo" style="width: 120px; height: 120px;" />
+        </div>
+        <h3>Jour ${index + 1} - ${formattedDate}</h3>
+        <p><strong>T° min :</strong> ${day.tmin}°C</p>
+        <p><strong>T° max :</strong> ${day.tmax}°C</p>
+        <p><strong>Pluie :</strong> ${day.probarain}%</p>
+        <p><strong>Ensoleillement :</strong> ${day.sun_hours}h</p>
+        ${showLat ? `<p><strong>Latitude :</strong> ${lat.toFixed(4)}</p>` : ""}
+        ${showLon ? `<p><strong>Longitude :</strong> ${lon.toFixed(4)}</p>` : ""}
+        ${showRain ? `<p><strong>Cumul pluie :</strong> ${day.rr10} mm</p>` : ""}
+        ${showWind ? `<p><strong>Vent moyen :</strong> ${day.wind10m} km/h</p>` : ""}
+        ${showDir ? `<p><strong>Direction vent :</strong> ${day.dirwind10m}°</p>` : ""}
+        ${showFog ? `<p><strong>Probabilité de brouillard :</strong> ${day.probafog}%</p>` : ""}
       `;
 
       resultSection.appendChild(card);
@@ -103,7 +101,7 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-// Gestion du slider pour le nombre de jours avec boutons +/-
+// Slider jours avec boutons +/- et affichage de la valeur
 const slider = document.getElementById('days');
 const decreaseBtn = document.getElementById('decrease-days');
 const increaseBtn = document.getElementById('increase-days');
@@ -131,10 +129,9 @@ slider.addEventListener('input', () => {
   updateDaysValue(slider.value);
 });
 
-// Initialisation de l'affichage du slider
 updateDaysValue(slider.value);
 
-// Gestion du mode sombre
+// Mode sombre toggle et sauvegarde en localStorage
 const darkToggle = document.getElementById("dark-toggle");
 
 darkToggle.addEventListener("click", () => {
@@ -149,7 +146,6 @@ darkToggle.addEventListener("click", () => {
   localStorage.setItem("dark-mode", document.body.classList.contains("dark"));
 });
 
-// Appliquer le mode sombre si activé précédemment
 window.addEventListener("DOMContentLoaded", () => {
   const darkEnabled = localStorage.getItem("dark-mode") === "true";
   if (darkEnabled) {

@@ -8,43 +8,62 @@
 </head>
 <body class="background">
   <video autoplay muted loop playsinline id="background-video">
-  <source src="videos/video_ciel.mp4" type="video/mp4">
-  Votre navigateur ne supporte pas la vidéo HTML5.
+    <source src="videos/video_ciel.mp4" type="video/mp4" />
+    Votre navigateur ne supporte pas la vidéo HTML5.
   </video>
 
   <main>
-    <button id="dark-toggle" style="float: right;">🌓 Mode sombre</button>
+    <button id="dark-toggle" class="float-right" aria-pressed="false" aria-label="Activer ou désactiver le mode sombre">🌓 Mode sombre</button>
 
     <h1>🌦️ Instant Weather</h1>
     
     <form id="weather-form">
       <label for="postal-code">Code postal :</label>
-      <input type="text" id="postal-code" name="postal-code" required pattern="^\d{5}$" placeholder="ex : 14000" />
+      <input
+        type="text"
+        id="postal-code"
+        name="postal-code"
+        required
+        pattern="\d{5}"
+        placeholder="ex : 14000"
+        aria-describedby="postal-code-desc"
+      />
+      <span id="postal-code-desc" class="sr-only">Entrez un code postal français à 5 chiffres</span>
 
       <label for="city">Commune :</label>
       <select id="city" name="city" required></select>
 
-  <label for="days">Nombre de jours :</label>
-<div class="days-slider-container">
-  <button type="button" id="decrease-days">−</button>
-  <input type="range" id="days" name="days" min="1" max="7" value="3">
-  <button type="button" id="increase-days">+</button>
-</div>
-<span id="days-value">3</span>
-  
+      <label for="days">Nombre de jours :</label>
+      <div class="days-slider-container">
+        <button type="button" id="decrease-days" aria-label="Diminuer le nombre de jours">−</button>
+        <input type="range" id="days" name="days" min="1" max="7" value="3" aria-valuemin="1" aria-valuemax="7" aria-valuenow="3" />
+        <button type="button" id="increase-days" aria-label="Augmenter le nombre de jours">+</button>
+      </div>
+      <span id="days-value">3</span>
+    
       <fieldset>
         <legend>Informations supplémentaires</legend>
+
         <div class="info-group">
-          <label><input type="checkbox" id="lat" /> Latitude</label>
-          <label><input type="checkbox" id="lon" /> Longitude</label>
+          <input type="checkbox" id="lat" name="info" value="lat" />
+          <label for="lat">Latitude</label>
+
+          <input type="checkbox" id="lon" name="info" value="lon" />
+          <label for="lon">Longitude</label>
         </div>
         <div class="info-group">
-          <label><input type="checkbox" id="rain" /> Cumul de pluie (mm)</label>
-          <label><input type="checkbox" id="wind" /> Vent moyen (km/h)</label>
+          <input type="checkbox" id="rain" name="info" value="rain" />
+          <label for="rain">Cumul de pluie (mm)</label>
+
+          <input type="checkbox" id="wind" name="info" value="wind" />
+          <label for="wind">Vent moyen (km/h)</label>
         </div>
         <div class="info-group">
-          <label><input type="checkbox" id="dir" /> Direction du vent (°)</label>
-          <label><input type="checkbox" id="fog"> Probabilité de brouillard %</label>
+          <input type="checkbox" id="dir" name="info" value="dir" />
+          <label for="dir">Direction du vent (°)</label>
+
+          <input type="checkbox" id="fog" name="info" value="fog" />
+          <label for="fog">Probabilité de brouillard %</label>
         </div>
       </fieldset>
 
