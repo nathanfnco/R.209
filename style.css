@@ -230,7 +230,6 @@ body {
   background-color: var(--bg-color);
 }
 
-
 body.dark {
   --bg-color: #1e1e1e;
   --glass-bg: rgba(30, 30, 30, 0.4);
