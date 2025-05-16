@@ -176,16 +176,23 @@ button:hover {
 }
 
 body.background {
-  background: url('france.png') center center no-repeat fixed;
+  background: url('images/france.png') center center no-repeat fixed;
   background-size: 60%; /* Réduit la taille de l’image */
   background-color: var(--bg-color); /* Fallback au cas où */
 }
 
 .weather-card img {
-  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
   margin: 0 auto;
-  margin-bottom: 0.5rem;
+  display: block;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
 
 .weather-card img {
   width: 70px;

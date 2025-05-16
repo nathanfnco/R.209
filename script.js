@@ -59,14 +59,14 @@ form.addEventListener("submit", async (e) => {
   const formattedDate = `${dayName} ${dayNumber} <span class="mois">${monthName}</span> ${year}`;
 
   // Sélection de l'icône météo
-  let iconSrc = "unknown.jpg"; // Valeur par défaut
-  if (day.weather >= 0 && day.weather <= 3) {
-    iconSrc = "sun.jpg"; // Soleil
-  } else if ((day.weather >= 4 && day.weather <= 7) || day.weather === 10) {
-    iconSrc = "nuage.jpg"; // Nuageux
-  } else if ((day.weather >= 8 && day.weather <= 14) || (day.weather >= 40 && day.weather <= 48)) {
-    iconSrc = "pluie.jpg"; // Pluie
-  }
+let iconSrc = "images/unknown.jpg"; // Par défaut
+if (day.weather >= 0 && day.weather <= 3) {
+  iconSrc = "images/sun.jpg"; // Soleil
+} else if ((day.weather >= 4 && day.weather <= 7) || day.weather === 10) {
+  iconSrc = "images/nuage.jpg"; // Nuageux
+} else if ((day.weather >= 8 && day.weather <= 14) || (day.weather >= 40 && day.weather <= 48)) {
+  iconSrc = "images/pluie.jpg"; // Pluie
+}
 
   card.innerHTML = `
     <div style="text-align: center;">
