@@ -6,3 +6,13 @@
   <title>Instant Weather - Avancé</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+<body class="background">
+  <main>
+    <h1>🌦️ Instant Weather</h1>
+    
+    <form id="weather-form">
+      <label for="postal-code">Code postal :</label>
+      <input type="text" id="postal-code" name="postal-code" required pattern="^\d{5}$" placeholder="ex : 14000" />
+
+      <label for="city">Commune :</label>
+      <select id="city" name="city" required></select>
