@@ -24,3 +24,19 @@ postalCodeInput.addEventListener("input", async () => {
     });
   }
 });
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const selected = JSON.parse(citySelect.value);
+  const inseeCode = selected.code;
+  const lat = selected.lat;
+  const lon = selected.lon;
+
+  const days = parseInt(document.getElementById("days").value);
+  const showLat = document.getElementById("lat").checked;
+  const showLon = document.getElementById("lon").checked;
+  const showRain = document.getElementById("rain").checked;
+  const showWind = document.getElementById("wind").checked;
+  const showDir = document.getElementById("dir").checked;
+  const showFog = document.getElementById("fog").checked;
