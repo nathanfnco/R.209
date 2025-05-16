@@ -19,9 +19,14 @@
       <label for="city">Commune :</label>
       <select id="city" name="city" required></select>
 
-      <label for="days">Nombre de jours (1-7) :</label>
-      <input type="number" id="days" name="days" min="1" max="7" value="1" />
-
+  <label for="days">Nombre de jours :</label>
+<div class="days-slider-container">
+  <button type="button" id="decrease-days">−</button>
+  <input type="range" id="days" name="days" min="1" max="7" value="3">
+  <button type="button" id="increase-days">+</button>
+</div>
+<span id="days-value">3</span>
+  
       <fieldset>
         <legend>Informations supplémentaires</legend>
         <div class="info-group">

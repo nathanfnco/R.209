@@ -270,3 +270,70 @@ body.dark .weather-card div p {
 #dark-toggle:hover {
   background-color: #2980b9;
 }
+
+/* --- SLIDER AVEC BOUTONS +/- POUR LE CHOIX DU NOMBRE DE JOURS --- */
+.days-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.days-slider-container input[type="range"] {
+  flex-grow: 1;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--accent-color);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.days-slider-container input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.days-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.7);
+  transition: background 0.3s ease;
+}
+
+.days-slider-container input[type="range"]:hover::-webkit-slider-thumb {
+  background: #2980b9;
+}
+
+.days-slider-container button {
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.3rem;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.days-slider-container button:hover {
+  background-color: #2980b9;
+  transform: scale(1.1);
+}
