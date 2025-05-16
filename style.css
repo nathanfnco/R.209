@@ -181,3 +181,85 @@ body.background {
   background-color: var(--bg-color); /* Fallback au cas où */
 }
 
+.weather-card img {
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 0.5rem;
+}
+
+.weather-card img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  margin: 0 auto 0.8rem auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.weather-card img:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.weather-card .weather-icon-wrapper {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.weather-card .weather-icon-wrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.weather-card img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+body.dark {
+  --bg-color: #1e1e1e;
+  --glass-bg: rgba(30, 30, 30, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent-color: #3498db;
+  --text-color: #f1f1f1;
+  background-color: var(--bg-color);
+}
+
+body.dark input,
+body.dark select,
+body.dark button {
+  background-color: #2c2c2c;
+  color: #f1f1f1;
+  border-color: #555;
+}
+
+body.dark fieldset {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .weather-card div p {
+  color: #ccc;
+}
+
+#dark-toggle {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#dark-toggle:hover {
+  background-color: #2980b9;
+}
