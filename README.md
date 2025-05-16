@@ -2,6 +2,5 @@ Instant Weather V2 est une application web permettant à l’utilisateur de cons
 
 Ce projet est l’évolution d’une première version développée en TD, enrichie ici de nouvelles fonctionnalités pour une meilleure expérience utilisateur
 
-Voici le lien du site : http://127.0.0.1:5500/
-
+Voici le lien du site : https://nathanfnco.github.io/R.209/
 Bonnes prévisions météorologiques ! :)
