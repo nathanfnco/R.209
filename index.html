@@ -3,44 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instant Weather - Avancé</title>
+  <title>Application Météo</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="background">
-  <main>
-    <h1>🌦️ Instant Weather</h1>
-    
-    <form id="weather-form">
+<body>
+
+  <!-- Vidéo de fond -->
+  <video autoplay muted loop id="background-video">
+    <source src="videos/video_ciel.mp4" type="video/mp4" />
+    Votre navigateur ne supporte pas la vidéo HTML5.
+  </video>
+
+  <!-- Toggle mode sombre -->
+  <button id="dark-toggle">🌓 Mode sombre</button>
+
+  <!-- Formulaire météo -->
+  <form id="weather-form">
+
+    <div class="input-group">
       <label for="postal-code">Code postal :</label>
-      <input type="text" id="postal-code" name="postal-code" required pattern="^\d{5}$" placeholder="ex : 14000" />
+      <input type="text" id="postal-code" maxlength="5" required />
+    </div>
 
-      <label for="city">Commune :</label>
-      <select id="city" name="city" required></select>
+    <div class="input-group">
+      <label for="city">Ville :</label>
+      <select id="city" required></select>
+    </div>
 
-      <label for="days">Nombre de jours (1-7) :</label>
-      <input type="number" id="days" name="days" min="1" max="7" value="1" />
+    <div class="days-container">
+      <label for="days">Nombre de jours :</label>
+      <div class="slider-container">
+        <button type="button" id="decrease-days">-</button>
+        <input type="range" id="days" min="1" max="7" value="3" />
+        <button type="button" id="increase-days">+</button>
+        <span id="days-value">3</span>
+      </div>
+    </div>
 
-      <fieldset>
-        <legend>Informations supplémentaires</legend>
-        <div class="info-group">
-          <label><input type="checkbox" id="lat" /> Latitude</label>
-          <label><input type="checkbox" id="lon" /> Longitude</label>
-        </div>
-        <div class="info-group">
-          <label><input type="checkbox" id="rain" /> Cumul de pluie (mm)</label>
-          <label><input type="checkbox" id="wind" /> Vent moyen (km/h)</label>
-        </div>
-        <div class="info-group">
-          <label><input type="checkbox" id="dir" /> Direction du vent (°)</label>
-          <label><input type="checkbox" id="fog"> Probabilité de brouillard</label>
-        </div>
-      </fieldset>
+    <fieldset>
+      <legend>Données supplémentaires</legend>
+      <label><input type="checkbox" id="lat" /> Latitude</label>
+      <label><input type="checkbox" id="lon" /> Longitude</label>
+      <label><input type="checkbox" id="rain" /> Pluie cumulée</label>
+      <label><input type="checkbox" id="wind" /> Vent moyen</label>
+      <label><input type="checkbox" id="dir" /> Direction du vent</label>
+      <label><input type="checkbox" id="fog" /> Probabilité de brouillard</label>
+    </fieldset>
 
-      <button type="submit">Voir la météo</button>
-    </form>
+    <button type="submit">Voir la météo</button>
+  </form>
 
-    <section id="weather-result" aria-live="polite"></section>
-  </main>
+  <!-- Résultat météo -->
+  <section id="weather-result"></section>
 
   <script src="script.js"></script>
 </body>
