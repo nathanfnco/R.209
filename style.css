@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 :root {
-  --bg-color: #eaf2f8;
-  --glass-bg: rgba(255, 255, 255, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.25);
-  --accent-color: #1844be;
-  --text-color: #2c3e50;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --bg-color: #f0f4f8;
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --accent-color: #3b82f6;
+  --text-color: #1e293b;
+  --shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
 }
 
 * {
@@ -78,7 +78,7 @@ fieldset {
   border: 1px solid #d0d7de;
   border-radius: 10px;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -111,6 +111,11 @@ fieldset {
   font-size: 1.5rem;
   line-height: 1;
   padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.days-slider-container button:hover {
+  background: #2563eb; /* un bleu plus foncé au hover */
 }
 
 button[type="submit"],
@@ -122,6 +127,12 @@ button[type="submit"],
   padding: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover,
+#dark-toggle:hover {
+  background: #2563eb;
 }
 
 #weather-result {
@@ -142,6 +153,7 @@ button[type="submit"],
   backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
   text-align: center;
+  color: var(--text-color);
 }
 
 .weather-card h3 {
@@ -158,17 +170,18 @@ button[type="submit"],
 
 /* Dark Mode */
 body.dark.background {
-  --bg-color: #121212;
-  --glass-bg: rgba(40, 40, 40, 0.8);
+  --bg-color: #121826;
+  --glass-bg: rgba(30, 38, 58, 0.85);
   --glass-border: rgba(255, 255, 255, 0.15);
   --accent-color: #4aa3ff;
-  --text-color: #e0e0e0;
+  --text-color: #e0e6f7;
+  --shadow: 0 8px 32px rgba(74, 163, 255, 0.4);
 }
 
 body.dark.background input,
 body.dark.background select,
 body.dark.background fieldset {
-  background: #2a2a2a;
+  background: #2a2f4a;
   color: var(--text-color);
-  border-color: #555;
+  border-color: #556799;
 }
