@@ -67,6 +67,7 @@ postalCodeInput.addEventListener("input", async () => {
 
 // Fonction pour retourner le chemin d'une image locale selon le code météo
 function getLocalWeatherImage(weatherCode) {
+  if ([41].includes(weatherCode)) return "images/phenomene_special.jpg";  // ajout pour code 41
   if ([0, 1].includes(weatherCode)) return "images/sun.jpg";
   if ([2, 3].includes(weatherCode)) return "images/nuage.jpg";
   if ([4].includes(weatherCode)) return "images/brouillard.jpg";
