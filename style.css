@@ -105,6 +105,12 @@ fieldset {
   color: white;
   border: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0;
 }
 
 button[type="submit"],
@@ -120,6 +126,34 @@ button[type="submit"],
 
 #weather-result {
   margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Carte météo */
+.weather-card {
+  background: var(--glass-bg);
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  width: 220px;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  text-align: center;
+}
+
+.weather-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--accent-color);
+}
+
+.weather-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
 }
 
 /* Dark Mode */

@@ -65,9 +65,15 @@ postalCodeInput.addEventListener("input", async () => {
   }
 });
 
-// Récupérer une icône météo (exemple générique)
-function getMeteoConceptIcon(code) {
-  return `https://www.meteo-concept.com/assets/images/weather/ico/${code}.svg`;
+// Fonction pour retourner le chemin d'une image locale selon le code météo
+function getLocalWeatherImage(weatherCode) {
+  if ([0, 1].includes(weatherCode)) return "images/sun.jpg";
+  if ([2, 3].includes(weatherCode)) return "images/nuage.jpg";
+  if ([4].includes(weatherCode)) return "images/brouillard.jpg";
+  if ([5, 6, 7].includes(weatherCode)) return "images/pluie.jpg";
+  if ([8, 9, 10].includes(weatherCode)) return "images/neige.jpg";
+  if ([11, 12].includes(weatherCode)) return "images/orage.jpg";
+  return "images/default.png"; // image par défaut si code inconnu
 }
 
 // Soumission du formulaire
@@ -81,10 +87,11 @@ form.addEventListener("submit", async (e) => {
 
   const insee = citySelect.value;
   const cityName = citySelect.options[citySelect.selectedIndex].text;
-  const days = parseInt(daysSlider.value);
+  let days = parseInt(daysSlider.value);
+  if (days > 7) days = 7; // limite max 7 jours
 
   try {
-    const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}&day=0`);
+    const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}`);
     const data = await res.json();
 
     if (!data.forecast) {
@@ -93,16 +100,39 @@ form.addEventListener("submit", async (e) => {
     }
 
     const forecasts = data.forecast.slice(0, days);
-    resultSection.innerHTML = forecasts.map(f => `
-      <div class="weather-card">
-        <h3>${cityName} - ${f.datetime}</h3>
-        <img src="${getMeteoConceptIcon(f.weather)}" alt="Icône météo" />
-        <p>Température max : ${f.tmax}°C</p>
-        <p>Température min : ${f.tmin}°C</p>
-        <p>Vent : ${f.wind10m} km/h</p>
-        <p>Pluie : ${f.rr10} mm</p>
-      </div>
-    `).join("");
+
+    // Récupérer les infos supplémentaires cochées
+    const checkedInfos = Array.from(form.querySelectorAll('input[name="info"]:checked')).map(i => i.value);
+
+    resultSection.innerHTML = forecasts.map(f => {
+      // Conversion date YYYY-MM-DD en jour + date format JJ/MM/AAAA
+      const dateObj = new Date(f.datetime);
+      const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+      const jourSemaine = jours[dateObj.getDay()];
+      const dateFormatee = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+      const titre = `${jourSemaine} - ${dateFormatee}`;
+
+      let extraInfosHtml = "";
+
+      if (checkedInfos.includes("lat") && f.lat !== undefined) extraInfosHtml += `<p>Latitude : ${f.lat}</p>`;
+      if (checkedInfos.includes("lon") && f.lon !== undefined) extraInfosHtml += `<p>Longitude : ${f.lon}</p>`;
+      if (checkedInfos.includes("rain") && f.rr10 !== undefined) extraInfosHtml += `<p>Pluie : ${f.rr10} mm</p>`;
+      if (checkedInfos.includes("wind") && f.wind10m !== undefined) extraInfosHtml += `<p>Vent moyen : ${f.wind10m} km/h</p>`;
+      if (checkedInfos.includes("dir") && f.dirwind10m !== undefined) extraInfosHtml += `<p>Direction du vent : ${f.dirwind10m}°</p>`;
+      if (checkedInfos.includes("fog") && f.fog !== undefined) extraInfosHtml += `<p>Brouillard : ${f.fog} %</p>`;
+
+      return `
+        <div class="weather-card">
+          <h3>${cityName} - ${titre}</h3>
+          <img src="${getLocalWeatherImage(f.weather)}" alt="Météo code ${f.weather}" class="weather-image" />
+          <p>Température max : ${f.tmax}°C</p>
+          <p>Température min : ${f.tmin}°C</p>
+          <p>Vent : ${f.wind10m} km/h</p>
+          <p>Pluie : ${f.rr10} mm</p>
+          ${extraInfosHtml}
+        </div>
+      `;
+    }).join("");
   } catch (err) {
     console.error(err);
     resultSection.innerHTML = `<p>Erreur lors de la récupération des données météo.</p>`;
