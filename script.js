@@ -1,155 +1,72 @@
-const geoApiUrl = "https://geo.api.gouv.fr/communes?codePostal=";
-const meteoApiUrl = "https://api.meteo-concept.com/api";
-const meteoToken = "8ee016add0cb1a0d590cb3065d3c80d96f2d00f4ae744aef440a36ecca085d10";
+const weatherForm = document.getElementById("weatherForm");
+const weatherCards = document.getElementById("weatherCards");
 
-const postalCodeInput = document.getElementById("postal-code");
-const citySelect = document.getElementById("city");
-const form = document.getElementById("weather-form");
-const resultSection = document.getElementById("weather-result");
-
-// Mise à jour des communes selon le code postal
-postalCodeInput.addEventListener("input", async () => {
-  const code = postalCodeInput.value;
-  if (/^\d{5}$/.test(code)) {
-    try {
-      const res = await fetch(`${geoApiUrl}${code}&fields=nom,code,centre`);
-      const cities = await res.json();
-
-      citySelect.innerHTML = "";
-      cities.forEach(city => {
-        const option = document.createElement("option");
-        option.value = JSON.stringify({
-          code: city.code,
-          lat: city.centre.coordinates[1],
-          lon: city.centre.coordinates[0]
-        });
-        option.textContent = city.nom;
-        citySelect.appendChild(option);
-      });
-    } catch (error) {
-      console.error("Erreur lors de la récupération des communes :", error);
-      citySelect.innerHTML = "<option value=''>Erreur de chargement</option>";
-    }
-  } else {
-    citySelect.innerHTML = "";
-  }
-});
-
-// Gestion de la soumission du formulaire et affichage météo
-form.addEventListener("submit", async (e) => {
+weatherForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  const city = document.getElementById("city").value.trim();
 
-  const selected = JSON.parse(citySelect.value);
-  const inseeCode = selected.code;
-  const lat = selected.lat;
-  const lon = selected.lon;
-
-  const days = parseInt(document.getElementById("days").value);
-  const showLat = document.getElementById("lat").checked;
-  const showLon = document.getElementById("lon").checked;
-  const showRain = document.getElementById("rain").checked;
-  const showWind = document.getElementById("wind").checked;
-  const showDir = document.getElementById("dir").checked;
-  const showFog = document.getElementById("fog").checked;
+  if (!city) return;
 
   try {
-    const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${inseeCode}`);
-    const data = await res.json();
-    const forecasts = data.forecast.slice(0, days);
+    // Étape 1 : Obtenir les coordonnées GPS avec l'API Geo
+    const geoResponse = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=fr&format=json`
+    );
+    const geoData = await geoResponse.json();
 
-    resultSection.innerHTML = "";
+    if (!geoData.results || geoData.results.length === 0) {
+      alert("Ville non trouvée.");
+      return;
+    }
 
-    forecasts.forEach((day, index) => {
-      const card = document.createElement("div");
-      card.className = "weather-card";
+    const { name, country, latitude, longitude } = geoData.results[0];
 
-      const date = new Date(day.datetime);
-      const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-      const dayNumber = date.getDate();
-      const monthName = date.toLocaleDateString("fr-FR", { month: "long" });
-      const year = date.getFullYear();
-      const formattedDate = `${dayName} ${dayNumber} <span class="mois">${monthName}</span> ${year}`;
+    // Étape 2 : Obtenir les données météo
+    const weatherResponse = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+    );
+    const weatherData = await weatherResponse.json();
 
-      // Choix icône météo dynamique
-      let iconSrc = "images/unknown.jpg"; // Par défaut
-      if (day.weather >= 0 && day.weather <= 3) iconSrc = "images/sun.jpg"; // Soleil
-      else if ((day.weather >= 4 && day.weather <= 7) || day.weather === 10) iconSrc = "images/nuage.jpg"; // Nuageux
-      else if ((day.weather >= 8 && day.weather <= 14) || (day.weather >= 40 && day.weather <= 48)) iconSrc = "images/pluie.jpg"; // Pluie
+    const weather = weatherData.current_weather;
+    if (!weather) {
+      alert("Aucune donnée météo disponible.");
+      return;
+    }
 
-      card.innerHTML = `
-        <div style="text-align: center;">
-          <img src="${iconSrc}" alt="Icône météo" style="width: 120px; height: 120px;" />
-        </div>
-        <h3>Jour ${index + 1} - ${formattedDate}</h3>
-        <p><strong>T° min :</strong> ${day.tmin}°C</p>
-        <p><strong>T° max :</strong> ${day.tmax}°C</p>
-        <p><strong>Pluie :</strong> ${day.probarain}%</p>
-        <p><strong>Ensoleillement :</strong> ${day.sun_hours}h</p>
-        ${showLat ? `<p><strong>Latitude :</strong> ${lat.toFixed(4)}</p>` : ""}
-        ${showLon ? `<p><strong>Longitude :</strong> ${lon.toFixed(4)}</p>` : ""}
-        ${showRain ? `<p><strong>Cumul pluie :</strong> ${day.rr10} mm</p>` : ""}
-        ${showWind ? `<p><strong>Vent moyen :</strong> ${day.wind10m} km/h</p>` : ""}
-        ${showDir ? `<p><strong>Direction vent :</strong> ${day.dirwind10m}°</p>` : ""}
-        ${showFog ? `<p><strong>Probabilité de brouillard :</strong> ${day.probafog}%</p>` : ""}
-      `;
+    const temperature = weather.temperature;
+    const windspeed = weather.windspeed;
+    const weatherCode = weather.weathercode;
 
-      resultSection.appendChild(card);
-    });
+    // Générer l'icône météo en fonction du code
+    const iconURL = getWeatherIcon(weatherCode);
+
+    // Créer la carte
+    const card = document.createElement("div");
+    card.className = "weather-card";
+    card.innerHTML = `
+      <h2>${name}, ${country}</h2>
+      <img src="${iconURL}" alt="Icône météo" />
+      <p>Température : ${temperature}°C</p>
+      <p>Vent : ${windspeed} km/h</p>
+    `;
+
+    weatherCards.innerHTML = ""; // Nettoyer les anciennes cartes
+    weatherCards.appendChild(card);
+
   } catch (error) {
     console.error("Erreur lors de la récupération des données météo :", error);
-    resultSection.innerHTML = "<p>Erreur lors de la récupération des données météo.</p>";
+    alert("Une erreur est survenue.");
   }
 });
 
-// Slider jours avec boutons +/- et affichage de la valeur
-const slider = document.getElementById('days');
-const decreaseBtn = document.getElementById('decrease-days');
-const increaseBtn = document.getElementById('increase-days');
-const daysValue = document.getElementById('days-value');
-
-function updateDaysValue(val) {
-  daysValue.textContent = val;
+function getWeatherIcon(code) {
+  if ([0].includes(code)) return "https://openweathermap.org/img/wn/01d.png";
+  if ([1, 2, 3].includes(code)) return "https://openweathermap.org/img/wn/02d.png";
+  if ([45, 48].includes(code)) return "https://openweathermap.org/img/wn/50d.png";
+  if ([51, 53, 55, 56, 57].includes(code)) return "https://openweathermap.org/img/wn/09d.png";
+  if ([61, 63, 65, 66, 67].includes(code)) return "https://openweathermap.org/img/wn/10d.png";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "https://openweathermap.org/img/wn/13d.png";
+  if ([80, 81, 82].includes(code)) return "https://openweathermap.org/img/wn/09d.png";
+  if ([95, 96, 99].includes(code)) return "https://openweathermap.org/img/wn/11d.png";
+  return "https://openweathermap.org/img/wn/01d.png";
 }
-
-decreaseBtn.addEventListener('click', () => {
-  if (slider.value > slider.min) {
-    slider.value = Number(slider.value) - 1;
-    updateDaysValue(slider.value);
-  }
-});
-
-increaseBtn.addEventListener('click', () => {
-  if (slider.value < slider.max) {
-    slider.value = Number(slider.value) + 1;
-    updateDaysValue(slider.value);
-  }
-});
-
-slider.addEventListener('input', () => {
-  updateDaysValue(slider.value);
-});
-
-updateDaysValue(slider.value);
-
-// Mode sombre toggle et sauvegarde en localStorage
-const darkToggle = document.getElementById("dark-toggle");
-
-darkToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-
-  if (document.body.classList.contains("dark")) {
-    darkToggle.textContent = "☀️ Mode clair";
-  } else {
-    darkToggle.textContent = "🌓 Mode sombre";
-  }
-
-  localStorage.setItem("dark-mode", document.body.classList.contains("dark"));
-});
-
-window.addEventListener("DOMContentLoaded", () => {
-  const darkEnabled = localStorage.getItem("dark-mode") === "true";
-  if (darkEnabled) {
-    document.body.classList.add("dark");
-    darkToggle.textContent = "☀️ Mode clair";
-  }
-});

@@ -3,58 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Application Météo</title>
+  <title>Instant Weather - Avancé</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="background">
 
   <!-- Vidéo de fond -->
-  <video autoplay muted loop id="background-video">
+  <video autoplay muted loop playsinline id="background-video">
     <source src="videos/video_ciel.mp4" type="video/mp4" />
     Votre navigateur ne supporte pas la vidéo HTML5.
   </video>
 
-  <!-- Toggle mode sombre -->
-  <button id="dark-toggle">🌓 Mode sombre</button>
+  <main>
+    <!-- Bouton mode sombre -->
+    <button id="dark-toggle" class="float-right" aria-pressed="false" aria-label="Activer ou désactiver le mode sombre">🌓 Mode sombre</button>
 
-  <!-- Formulaire météo -->
-  <form id="weather-form">
+    <h1>🌦️ Instant Weather</h1>
 
-    <div class="input-group">
+    <!-- Formulaire météo -->
+    <form id="weather-form">
+      <!-- Code postal -->
       <label for="postal-code">Code postal :</label>
-      <input type="text" id="postal-code" maxlength="5" required />
-    </div>
+      <input
+        type="text"
+        id="postal-code"
+        name="postal-code"
+        required
+        pattern="\d{5}"
+        placeholder="ex : 14000"
+        aria-describedby="postal-code-desc"
+      />
+      <span id="postal-code-desc" class="sr-only">Entrez un code postal français à 5 chiffres</span>
 
-    <div class="input-group">
-      <label for="city">Ville :</label>
-      <select id="city" required></select>
-    </div>
+      <!-- Sélecteur de ville -->
+      <label for="city">Commune :</label>
+      <select id="city" name="city" required></select>
 
-    <div class="days-container">
+      <!-- Slider de jours -->
       <label for="days">Nombre de jours :</label>
-      <div class="slider-container">
-        <button type="button" id="decrease-days">-</button>
-        <input type="range" id="days" min="1" max="7" value="3" />
-        <button type="button" id="increase-days">+</button>
+      <div class="days-slider-container">
+        <button type="button" id="decrease-days" aria-label="Diminuer le nombre de jours">−</button>
+        <input type="range" id="days" name="days" min="1" max="7" value="3" />
+        <button type="button" id="increase-days" aria-label="Augmenter le nombre de jours">+</button>
         <span id="days-value">3</span>
       </div>
-    </div>
 
-    <fieldset>
-      <legend>Données supplémentaires</legend>
-      <label><input type="checkbox" id="lat" /> Latitude</label>
-      <label><input type="checkbox" id="lon" /> Longitude</label>
-      <label><input type="checkbox" id="rain" /> Pluie cumulée</label>
-      <label><input type="checkbox" id="wind" /> Vent moyen</label>
-      <label><input type="checkbox" id="dir" /> Direction du vent</label>
-      <label><input type="checkbox" id="fog" /> Probabilité de brouillard</label>
-    </fieldset>
+      <!-- Informations supplémentaires -->
+      <fieldset>
+        <legend>Informations supplémentaires</legend>
 
-    <button type="submit">Voir la météo</button>
-  </form>
+        <div class="info-group">
+          <input type="checkbox" id="lat" name="info" value="lat" />
+          <label for="lat">Latitude</label>
 
-  <!-- Résultat météo -->
-  <section id="weather-result"></section>
+          <input type="checkbox" id="lon" name="info" value="lon" />
+          <label for="lon">Longitude</label>
+        </div>
+
+        <div class="info-group">
+          <input type="checkbox" id="rain" name="info" value="rain" />
+          <label for="rain">Cumul de pluie (mm)</label>
+
+          <input type="checkbox" id="wind" name="info" value="wind" />
+          <label for="wind">Vent moyen (km/h)</label>
+        </div>
+
+        <div class="info-group">
+          <input type="checkbox" id="dir" name="info" value="dir" />
+          <label for="dir">Direction du vent (°)</label>
+
+          <input type="checkbox" id="fog" name="info" value="fog" />
+          <label for="fog">Probabilité de brouillard (%)</label>
+        </div>
+      </fieldset>
+
+      <button type="submit">Voir la météo</button>
+    </form>
+
+    <!-- Résultat météo -->
+    <section id="weather-result" aria-live="polite"></section>
+  </main>
 
   <script src="script.js"></script>
 </body>
