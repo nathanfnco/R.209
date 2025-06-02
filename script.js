@@ -10,6 +10,16 @@ const resultSection = document.getElementById("weather-result");
 const form = document.getElementById("weather-form");
 const darkToggle = document.getElementById("dark-toggle");
 
+// Création d’une balise img dans le bouton dark-toggle (à ajouter une fois)
+const darkToggleImg = document.createElement("img");
+darkToggleImg.src = "mode_sombre.png"; // image initiale (mode clair)
+darkToggleImg.alt = "Activer le mode sombre";
+darkToggleImg.style.width = "24px";  // ajuste la taille à ta convenance
+darkToggleImg.style.height = "24px";
+darkToggleImg.style.verticalAlign = "middle";
+darkToggle.innerHTML = ""; // Vide le texte actuel du bouton
+darkToggle.appendChild(darkToggleImg);
+
 // Actualiser la valeur du slider
 daysSlider.addEventListener("input", () => {
   daysValue.textContent = daysSlider.value;
@@ -29,9 +39,18 @@ document.getElementById("increase-days").addEventListener("click", () => {
   }
 });
 
-// Activer/désactiver le mode sombre
+// Activer/désactiver le mode sombre avec changement d’image
 darkToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  darkToggle.setAttribute("aria-pressed", isDark);
+  if (isDark) {
+    darkToggleImg.src = "images/mode_clair.png";  // image quand on est en mode sombre (bouton pour passer au mode clair)
+    darkToggleImg.alt = "Activer le mode clair";
+  } else {
+    darkToggleImg.src = "images/mode_sombre.png"; // image quand on est en mode clair (bouton pour passer au mode sombre)
+    darkToggleImg.alt = "Activer le mode sombre";
+  }
 });
 
 // Chargement dynamique des communes

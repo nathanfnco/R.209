@@ -186,3 +186,28 @@ body.dark.background fieldset {
   border-color: #556799;
 }
 
+#dark-toggle {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#dark-toggle img {
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  user-select: none;
+  border-radius: 50%;
+  outline: none;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+#dark-toggle:focus {
+  outline: none;
+}
+
+#dark-toggle.rotate img {
+  transform: rotate(180deg);
+}
