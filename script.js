@@ -1,72 +1,110 @@
-const weatherForm = document.getElementById("weatherForm");
-const weatherCards = document.getElementById("weatherCards");
+const geoApiUrl = "https://geo.api.gouv.fr/communes?codePostal=";
+const meteoApiUrl = "https://api.meteo-concept.com/api";
+const meteoToken = "8ee016add0cb1a0d590cb3065d3c80d96f2d00f4ae744aef440a36ecca085d10";
 
-weatherForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const city = document.getElementById("city").value.trim();
+const postalCodeInput = document.getElementById("postal-code");
+const citySelect = document.getElementById("city");
+const daysSlider = document.getElementById("days");
+const daysValue = document.getElementById("days-value");
+const resultSection = document.getElementById("weather-result");
+const form = document.getElementById("weather-form");
+const darkToggle = document.getElementById("dark-toggle");
 
-  if (!city) return;
+// Actualiser la valeur du slider
+daysSlider.addEventListener("input", () => {
+  daysValue.textContent = daysSlider.value;
+});
 
-  try {
-    // Étape 1 : Obtenir les coordonnées GPS avec l'API Geo
-    const geoResponse = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=fr&format=json`
-    );
-    const geoData = await geoResponse.json();
-
-    if (!geoData.results || geoData.results.length === 0) {
-      alert("Ville non trouvée.");
-      return;
-    }
-
-    const { name, country, latitude, longitude } = geoData.results[0];
-
-    // Étape 2 : Obtenir les données météo
-    const weatherResponse = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-    );
-    const weatherData = await weatherResponse.json();
-
-    const weather = weatherData.current_weather;
-    if (!weather) {
-      alert("Aucune donnée météo disponible.");
-      return;
-    }
-
-    const temperature = weather.temperature;
-    const windspeed = weather.windspeed;
-    const weatherCode = weather.weathercode;
-
-    // Générer l'icône météo en fonction du code
-    const iconURL = getWeatherIcon(weatherCode);
-
-    // Créer la carte
-    const card = document.createElement("div");
-    card.className = "weather-card";
-    card.innerHTML = `
-      <h2>${name}, ${country}</h2>
-      <img src="${iconURL}" alt="Icône météo" />
-      <p>Température : ${temperature}°C</p>
-      <p>Vent : ${windspeed} km/h</p>
-    `;
-
-    weatherCards.innerHTML = ""; // Nettoyer les anciennes cartes
-    weatherCards.appendChild(card);
-
-  } catch (error) {
-    console.error("Erreur lors de la récupération des données météo :", error);
-    alert("Une erreur est survenue.");
+document.getElementById("decrease-days").addEventListener("click", () => {
+  if (daysSlider.value > 1) {
+    daysSlider.value--;
+    daysSlider.dispatchEvent(new Event("input"));
   }
 });
 
-function getWeatherIcon(code) {
-  if ([0].includes(code)) return "https://openweathermap.org/img/wn/01d.png";
-  if ([1, 2, 3].includes(code)) return "https://openweathermap.org/img/wn/02d.png";
-  if ([45, 48].includes(code)) return "https://openweathermap.org/img/wn/50d.png";
-  if ([51, 53, 55, 56, 57].includes(code)) return "https://openweathermap.org/img/wn/09d.png";
-  if ([61, 63, 65, 66, 67].includes(code)) return "https://openweathermap.org/img/wn/10d.png";
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return "https://openweathermap.org/img/wn/13d.png";
-  if ([80, 81, 82].includes(code)) return "https://openweathermap.org/img/wn/09d.png";
-  if ([95, 96, 99].includes(code)) return "https://openweathermap.org/img/wn/11d.png";
-  return "https://openweathermap.org/img/wn/01d.png";
+document.getElementById("increase-days").addEventListener("click", () => {
+  if (daysSlider.value < 7) {
+    daysSlider.value++;
+    daysSlider.dispatchEvent(new Event("input"));
+  }
+});
+
+// Activer/désactiver le mode sombre
+darkToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+});
+
+// Chargement dynamique des communes
+postalCodeInput.addEventListener("input", async () => {
+  const code = postalCodeInput.value;
+  if (/^\d{5}$/.test(code)) {
+    try {
+      const res = await fetch(`${geoApiUrl}${code}`);
+      const data = await res.json();
+      citySelect.innerHTML = "";
+      if (data.length === 0) {
+        citySelect.innerHTML = `<option>Aucune commune trouvée</option>`;
+        citySelect.disabled = true;
+        return;
+      }
+      data.forEach(commune => {
+        const option = document.createElement("option");
+        option.value = commune.code;
+        option.textContent = commune.nom;
+        citySelect.appendChild(option);
+      });
+      citySelect.disabled = false;
+    } catch (e) {
+      console.error(e);
+      citySelect.innerHTML = `<option>Erreur API</option>`;
+      citySelect.disabled = true;
+    }
+  } else {
+    citySelect.innerHTML = "";
+    citySelect.disabled = true;
+  }
+});
+
+// Récupérer une icône météo (exemple générique)
+function getMeteoConceptIcon(code) {
+  return `https://www.meteo-concept.com/assets/images/weather/ico/${code}.svg`;
 }
+
+// Soumission du formulaire
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (citySelect.disabled || !citySelect.value) {
+    alert("Veuillez sélectionner une commune valide.");
+    return;
+  }
+
+  const insee = citySelect.value;
+  const cityName = citySelect.options[citySelect.selectedIndex].text;
+  const days = parseInt(daysSlider.value);
+
+  try {
+    const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}&day=0`);
+    const data = await res.json();
+
+    if (!data.forecast) {
+      resultSection.innerHTML = `<p>Aucune donnée météo disponible.</p>`;
+      return;
+    }
+
+    const forecasts = data.forecast.slice(0, days);
+    resultSection.innerHTML = forecasts.map(f => `
+      <div class="weather-card">
+        <h3>${cityName} - ${f.datetime}</h3>
+        <img src="${getMeteoConceptIcon(f.weather)}" alt="Icône météo" />
+        <p>Température max : ${f.tmax}°C</p>
+        <p>Température min : ${f.tmin}°C</p>
+        <p>Vent : ${f.wind10m} km/h</p>
+        <p>Pluie : ${f.rr10} mm</p>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error(err);
+    resultSection.innerHTML = `<p>Erreur lors de la récupération des données météo.</p>`;
+  }
+});
