@@ -1,37 +1,26 @@
-const geoApiUrl = "https://geo.api.gouv.fr/communes?codePostal=";
+const geoApiUrl = "https://geo.api.gouv.fr/communes";
 const meteoApiUrl = "https://api.meteo-concept.com/api";
 const meteoToken = "8ee016add0cb1a0d590cb3065d3c80d96f2d00f4ae744aef440a36ecca085d10";
 
-const postalCodeInput = document.getElementById("postal-code");
+const cityInput = document.getElementById("city-input");
 const citySelect = document.getElementById("city");
 const daysSlider = document.getElementById("days");
 const daysValue = document.getElementById("days-value");
 const resultSection = document.getElementById("weather-result");
 const form = document.getElementById("weather-form");
 const darkToggle = document.getElementById("dark-toggle");
+const darkToggleImg = document.getElementById("dark-toggle-img");
 
-// Création d’une balise img dans le bouton dark-toggle (à ajouter une fois)
-const darkToggleImg = document.createElement("img");
-darkToggleImg.src = "mode_sombre.png"; // image initiale (mode clair)
-darkToggleImg.alt = "Activer le mode sombre";
-darkToggleImg.style.width = "24px";  // ajuste la taille à ta convenance
-darkToggleImg.style.height = "24px";
-darkToggleImg.style.verticalAlign = "middle";
-darkToggle.innerHTML = ""; // Vide le texte actuel du bouton
-darkToggle.appendChild(darkToggleImg);
-
-// Actualiser la valeur du slider
+// Mise à jour affichage jours slider
 daysSlider.addEventListener("input", () => {
   daysValue.textContent = daysSlider.value;
 });
-
 document.getElementById("decrease-days").addEventListener("click", () => {
   if (daysSlider.value > 1) {
     daysSlider.value--;
     daysSlider.dispatchEvent(new Event("input"));
   }
 });
-
 document.getElementById("increase-days").addEventListener("click", () => {
   if (daysSlider.value < 7) {
     daysSlider.value++;
@@ -39,29 +28,40 @@ document.getElementById("increase-days").addEventListener("click", () => {
   }
 });
 
-// Activer/désactiver le mode sombre avec changement d’image
+// Mode sombre toggle
 darkToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   const isDark = document.body.classList.contains("dark");
   darkToggle.setAttribute("aria-pressed", isDark);
-  if (isDark) {
-    darkToggleImg.src = "images/mode_clair.png";  // image quand on est en mode sombre (bouton pour passer au mode clair)
-    darkToggleImg.alt = "Activer le mode clair";
-  } else {
-    darkToggleImg.src = "images/mode_sombre.png"; // image quand on est en mode clair (bouton pour passer au mode sombre)
-    darkToggleImg.alt = "Activer le mode sombre";
-  }
+  darkToggleImg.src = isDark ? "images/mode_clair.png" : "images/mode_sombre.png";
+  darkToggleImg.alt = isDark ? "Activer le mode clair" : "Activer le mode sombre";
 });
 
-// Chargement dynamique des communes
-postalCodeInput.addEventListener("input", async () => {
-  const code = postalCodeInput.value;
-  if (/^\d{5}$/.test(code)) {
+// Recherche des communes par code postal OU nom de ville
+let searchTimeout;
+cityInput.addEventListener("input", () => {
+  clearTimeout(searchTimeout);
+  const input = cityInput.value.trim();
+
+  searchTimeout = setTimeout(async () => {
+    if (input.length < 2) {
+      citySelect.innerHTML = "";
+      citySelect.disabled = true;
+      return;
+    }
+
+    let url = "";
+    if (/^\d{5}$/.test(input)) {
+      url = `${geoApiUrl}?codePostal=${input}&fields=nom,code&format=json&boost=population`;
+    } else {
+      url = `${geoApiUrl}?nom=${encodeURIComponent(input)}&fields=nom,code&format=json&boost=population&limit=10`;
+    }
+
     try {
-      const res = await fetch(`${geoApiUrl}${code}`);
+      const res = await fetch(url);
       const data = await res.json();
       citySelect.innerHTML = "";
-      if (data.length === 0) {
+      if (!data.length) {
         citySelect.innerHTML = `<option>Aucune commune trouvée</option>`;
         citySelect.disabled = true;
         return;
@@ -73,42 +73,32 @@ postalCodeInput.addEventListener("input", async () => {
         citySelect.appendChild(option);
       });
       citySelect.disabled = false;
-    } catch (e) {
-      console.error(e);
+    } catch {
       citySelect.innerHTML = `<option>Erreur API</option>`;
       citySelect.disabled = true;
     }
-  } else {
-    citySelect.innerHTML = "";
-    citySelect.disabled = true;
-  }
+  }, 300);
 });
 
-// Fonction pour retourner le chemin d'une image locale selon le code météo
-function getLocalWeatherImage(weatherCode) {
-  if ([41].includes(weatherCode)) return "images/phenomene_special.jpg";  // ajout pour code 41
-  if ([0, 1].includes(weatherCode)) return "images/sun.jpg";
-  if ([2, 3].includes(weatherCode)) return "images/nuage.jpg";
-  if ([4].includes(weatherCode)) return "images/brouillard.jpg";
-  if ([5, 6, 7].includes(weatherCode)) return "images/pluie.jpg";
-  if ([8, 9, 10].includes(weatherCode)) return "images/neige.jpg";
-  if ([11, 12].includes(weatherCode)) return "images/orage.jpg";
-  return "images/default.png"; // image par défaut si code inconnu
+// Fonction pour icône météo locale
+function getLocalWeatherImage(code) {
+  if ([0, 1].includes(code)) return "images/sun.jpg";
+  if ([5, 6, 7].includes(code)) return "images/pluie.jpg";
+  return "images/nuage.jpg";
 }
 
 // Soumission du formulaire
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   if (citySelect.disabled || !citySelect.value) {
-    alert("Veuillez sélectionner une commune valide.");
+    alert("Veuillez sélectionner une commune.");
     return;
   }
 
   const insee = citySelect.value;
   const cityName = citySelect.options[citySelect.selectedIndex].text;
   let days = parseInt(daysSlider.value);
-  if (days > 7) days = 7; // limite max 7 jours
+  if (days > 7) days = 7;
 
   try {
     const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}`);
@@ -119,42 +109,34 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    const forecasts = data.forecast.slice(0, days);
-
-    // Récupérer les infos supplémentaires cochées
     const checkedInfos = Array.from(form.querySelectorAll('input[name="info"]:checked')).map(i => i.value);
 
-    resultSection.innerHTML = forecasts.map(f => {
-      // Conversion date YYYY-MM-DD en jour + date format JJ/MM/AAAA
-      const dateObj = new Date(f.datetime);
+    resultSection.innerHTML = data.forecast.slice(0, days).map(f => {
+      const d = new Date(f.datetime);
       const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-      const jourSemaine = jours[dateObj.getDay()];
-      const dateFormatee = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
-      const titre = `${jourSemaine} - ${dateFormatee}`;
+      const titre = `${jours[d.getDay()]} - ${d.toLocaleDateString("fr-FR")}`;
 
-      let extraInfosHtml = "";
+      let extras = "";
+if (checkedInfos.includes("lat")) extras += `<p>Latitude : ${f.lat ?? "N/A"}</p>`;
+if (checkedInfos.includes("lon")) extras += `<p>Longitude : ${f.lon ?? "N/A"}</p>`;
+if (checkedInfos.includes("rain")) extras += `<p>Pluie : ${f.rr10 ?? "N/A"} mm</p>`;
+if (checkedInfos.includes("wind")) extras += `<p>Vent : ${f.wind10m ?? "N/A"} km/h</p>`;
+if (checkedInfos.includes("dir")) extras += `<p>Direction : ${f.dirwind10m ?? "N/A"}°</p>`;
 
-      if (checkedInfos.includes("lat") && f.lat !== undefined) extraInfosHtml += `<p>Latitude : ${f.lat}</p>`;
-      if (checkedInfos.includes("lon") && f.lon !== undefined) extraInfosHtml += `<p>Longitude : ${f.lon}</p>`;
-      if (checkedInfos.includes("rain") && f.rr10 !== undefined) extraInfosHtml += `<p>Pluie : ${f.rr10} mm</p>`;
-      if (checkedInfos.includes("wind") && f.wind10m !== undefined) extraInfosHtml += `<p>Vent moyen : ${f.wind10m} km/h</p>`;
-      if (checkedInfos.includes("dir") && f.dirwind10m !== undefined) extraInfosHtml += `<p>Direction du vent : ${f.dirwind10m}°</p>`;
-      if (checkedInfos.includes("fog") && f.fog !== undefined) extraInfosHtml += `<p>Brouillard : ${f.fog} %</p>`;
+
+      console.log("Code météo:", f.weather); // <-- Ajout ici
 
       return `
         <div class="weather-card">
           <h3>${cityName} - ${titre}</h3>
           <img src="${getLocalWeatherImage(f.weather)}" alt="Météo code ${f.weather}" class="weather-image" />
-          <p>Température max : ${f.tmax}°C</p>
-          <p>Température min : ${f.tmin}°C</p>
-          <p>Vent : ${f.wind10m} km/h</p>
-          <p>Pluie : ${f.rr10} mm</p>
-          ${extraInfosHtml}
+          <p>Max : ${f.tmax}°C</p>
+          <p>Min : ${f.tmin}°C</p>
+          ${extras}
         </div>
       `;
     }).join("");
-  } catch (err) {
-    console.error(err);
+  } catch {
     resultSection.innerHTML = `<p>Erreur lors de la récupération des données météo.</p>`;
   }
 });
