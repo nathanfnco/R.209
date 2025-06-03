@@ -1,0 +1,2 @@
+Instant Weather V2 est une application web météo responsive qui permet de rechercher une commune française par nom ou code postal et d’afficher les prévisions météo sur plusieurs jours. L’utilisateur peut choisir le nombre de jours et des informations supplémentaires à afficher. Le site propose aussi un mode sombre et un design moderne avec fond vidéo. Le projet utilise les APIs Géo et Météo Concept. 
+Le lien pour site : https://nathanfnco.github.io/R.209/
