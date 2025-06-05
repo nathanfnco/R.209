@@ -11,16 +11,21 @@ const form = document.getElementById("weather-form");
 const darkToggle = document.getElementById("dark-toggle");
 const darkToggleImg = document.getElementById("dark-toggle-img");
 
-// Mise à jour affichage jours slider
+// Initialisation du slider
+daysValue.textContent = daysSlider.value;
+
+// Gestion du slider
 daysSlider.addEventListener("input", () => {
   daysValue.textContent = daysSlider.value;
 });
+
 document.getElementById("decrease-days").addEventListener("click", () => {
   if (daysSlider.value > 1) {
     daysSlider.value--;
     daysSlider.dispatchEvent(new Event("input"));
   }
 });
+
 document.getElementById("increase-days").addEventListener("click", () => {
   if (daysSlider.value < 7) {
     daysSlider.value++;
@@ -28,7 +33,7 @@ document.getElementById("increase-days").addEventListener("click", () => {
   }
 });
 
-// Mode sombre toggle
+// Mode sombre
 darkToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   const isDark = document.body.classList.contains("dark");
@@ -37,7 +42,7 @@ darkToggle.addEventListener("click", () => {
   darkToggleImg.alt = isDark ? "Activer le mode clair" : "Activer le mode sombre";
 });
 
-// Recherche des communes par code postal OU nom de ville
+// Recherche des communes
 let searchTimeout;
 cityInput.addEventListener("input", () => {
   clearTimeout(searchTimeout);
@@ -61,11 +66,13 @@ cityInput.addEventListener("input", () => {
       const res = await fetch(url);
       const data = await res.json();
       citySelect.innerHTML = "";
+      
       if (!data.length) {
-        citySelect.innerHTML = `<option>Aucune commune trouvée</option>`;
+        citySelect.innerHTML = `<option value="">Aucune commune trouvée</option>`;
         citySelect.disabled = true;
         return;
       }
+      
       data.forEach(commune => {
         const option = document.createElement("option");
         option.value = commune.code;
@@ -73,14 +80,15 @@ cityInput.addEventListener("input", () => {
         citySelect.appendChild(option);
       });
       citySelect.disabled = false;
-    } catch {
-      citySelect.innerHTML = `<option>Erreur API</option>`;
+    } catch (error) {
+      console.error("Erreur API:", error);
+      citySelect.innerHTML = `<option value="">Erreur API</option>`;
       citySelect.disabled = true;
     }
   }, 300);
 });
 
-// Fonction pour icône météo locale
+// Fonction pour obtenir l'image météo
 function getLocalWeatherImage(code) {
   if ([0, 1].includes(code)) return "images/sun.jpg";
   if ([5, 6, 7].includes(code)) return "images/pluie.jpg";
@@ -90,53 +98,57 @@ function getLocalWeatherImage(code) {
 // Soumission du formulaire
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  
   if (citySelect.disabled || !citySelect.value) {
-    alert("Veuillez sélectionner une commune.");
+    alert("Veuillez sélectionner une commune valide.");
     return;
   }
 
   const insee = citySelect.value;
   const cityName = citySelect.options[citySelect.selectedIndex].text;
-  let days = parseInt(daysSlider.value);
-  if (days > 7) days = 7;
+  const days = Math.min(parseInt(daysSlider.value), 7);
 
   try {
     const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}`);
     const data = await res.json();
 
     if (!data.forecast) {
-      resultSection.innerHTML = `<p>Aucune donnée météo disponible.</p>`;
+      resultSection.innerHTML = `<p class="error">Aucune donnée météo disponible pour cette commune.</p>`;
       return;
     }
 
     const checkedInfos = Array.from(form.querySelectorAll('input[name="info"]:checked')).map(i => i.value);
-
+    
     resultSection.innerHTML = data.forecast.slice(0, days).map(f => {
-      const d = new Date(f.datetime);
-      const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-      const titre = `${jours[d.getDay()]} - ${d.toLocaleDateString("fr-FR")}`;
+      const date = new Date(f.datetime);
+      const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+      const dayName = dayNames[date.getDay()];
+      const formattedDate = date.toLocaleDateString("fr-FR");
 
-      let extras = "";
-if (checkedInfos.includes("lat")) extras += `<p>Latitude : ${f.lat ?? "N/A"}</p>`;
-if (checkedInfos.includes("lon")) extras += `<p>Longitude : ${f.lon ?? "N/A"}</p>`;
-if (checkedInfos.includes("rain")) extras += `<p>Pluie : ${f.rr10 ?? "N/A"} mm</p>`;
-if (checkedInfos.includes("wind")) extras += `<p>Vent : ${f.wind10m ?? "N/A"} km/h</p>`;
-if (checkedInfos.includes("dir")) extras += `<p>Direction : ${f.dirwind10m ?? "N/A"}°</p>`;
-
-
-      console.log("Code météo:", f.weather); // <-- Ajout ici
+      let additionalInfo = "";
+      if (checkedInfos.includes("lat")) additionalInfo += `<p><strong>Latitude:</strong> ${f.lat?.toFixed(4) || "N/A"}</p>`;
+      if (checkedInfos.includes("lon")) additionalInfo += `<p><strong>Longitude:</strong> ${f.lon?.toFixed(4) || "N/A"}</p>`;
+      if (checkedInfos.includes("rain")) additionalInfo += `<p><strong>Pluie:</strong> ${f.rr10 || "0"} mm</p>`;
+      if (checkedInfos.includes("wind")) additionalInfo += `<p><strong>Vent:</strong> ${f.wind10m || "N/A"} km/h</p>`;
+      if (checkedInfos.includes("dir")) additionalInfo += `<p><strong>Direction vent:</strong> ${f.dirwind10m || "N/A"}°</p>`;
+      if (checkedInfos.includes("fog")) additionalInfo += `<p><strong>Brouillard:</strong> ${f.probarain || "0"}%</p>`;
 
       return `
-        <div class="weather-card">
-          <h3>${cityName} - ${titre}</h3>
-          <img src="${getLocalWeatherImage(f.weather)}" alt="Météo code ${f.weather}" class="weather-image" />
-          <p>Max : ${f.tmax}°C</p>
-          <p>Min : ${f.tmin}°C</p>
-          ${extras}
+        <div class="weather-card" style="animation-delay: ${Math.random() * 0.3}s">
+          <h3>${cityName} - ${dayName} ${formattedDate}</h3>
+          <img src="${getLocalWeatherImage(f.weather)}" alt="Météo: ${f.weather}" class="weather-image" />
+          <div class="temps">
+            <p>🌡 Max: ${f.tmax}°C</p>
+            <p>❄ Min: ${f.tmin}°C</p>
+          </div>
+          <div class="additional-info">
+            ${additionalInfo}
+          </div>
         </div>
       `;
     }).join("");
-  } catch {
-    resultSection.innerHTML = `<p>Erreur lors de la récupération des données météo.</p>`;
+  } catch (error) {
+    console.error("Erreur météo:", error);
+    resultSection.innerHTML = `<p class="error">Erreur lors de la récupération des données météo. Veuillez réessayer.</p>`;
   }
 });
