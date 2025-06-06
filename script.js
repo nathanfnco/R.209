@@ -88,14 +88,14 @@ cityInput.addEventListener("input", () => {
   }, 300);
 });
 
-// Fonction pour obtenir l'image météo (version améliorée)
+// Fonction pour obtenir l'image météo
 function getLocalWeatherImage(code) {
   // Codes correspondant à la pluie (selon l'API Meteo Concept)
-  if (code >= 10 && code <= 16) return "images/pluie.jpg"; // Pluie faible à forte
-  if (code >= 20 && code <= 22) return "images/pluie.jpg"; // Averses
-  if (code >= 30 && code <= 32) return "images/pluie.jpg"; // Pluie et neige mêlées
-  if (code === 40 || code === 41 || code === 45 || code === 46) return "images/pluie.jpg"; // Brouillard avec pluie
-  if (code >= 60 && code <= 67) return "images/pluie.jpg"; // Orages avec pluie
+  if (code >= 10 && code <= 16) return "images/pluie.jpg";
+  if (code >= 20 && code <= 22) return "images/pluie.jpg";
+  if (code >= 30 && code <= 32) return "images/pluie.jpg";
+  if (code === 40 || code === 41 || code === 45 || code === 46) return "images/pluie.jpg";
+  if (code >= 60 && code <= 67) return "images/pluie.jpg";
   
   // Ensoleillé
   if (code === 0 || code === 1) return "images/sun.jpg";
@@ -118,7 +118,7 @@ form.addEventListener("submit", async (e) => {
   const days = Math.min(parseInt(daysSlider.value), 7);
 
   try {
-    // Récupération des données météo avec plus de champs
+    // Récupération des données météo
     const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}`);
     const data = await res.json();
 
@@ -152,15 +152,17 @@ form.addEventListener("submit", async (e) => {
       if (checkedInfos.includes("fog")) additionalInfo += `<p><strong>Brouillard:</strong> ${brouillard}%</p>`;
 
       return `
-        <div class="weather-card" style="animation-delay: ${index * 0.1}s">
-          <h3>${cityName} - ${dayName} ${formattedDate}</h3>
-          <img src="${getLocalWeatherImage(f.weather)}" alt="Météo: ${f.weather}" class="weather-image" />
-          <div class="temps">
-            <p>🌡 Max: ${f.tmax}°C</p>
-            <p>❄ Min: ${f.tmin}°C</p>
-          </div>
-          <div class="additional-info">
-            ${additionalInfo}
+        <div class="weather-card">
+          <div class="card-content">
+            <h3>${cityName} - ${dayName} ${formattedDate}</h3>
+            <img src="${getLocalWeatherImage(f.weather)}" alt="Météo: ${f.weather}" class="weather-image" />
+            <div class="temps">
+              <p>🌡 Max: ${f.tmax}°C</p>
+              <p>❄ Min: ${f.tmin}°C</p>
+            </div>
+            <div class="additional-info">
+              ${additionalInfo}
+            </div>
           </div>
         </div>
       `;
