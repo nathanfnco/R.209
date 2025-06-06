@@ -118,6 +118,7 @@ form.addEventListener("submit", async (e) => {
   const days = Math.min(parseInt(daysSlider.value), 7);
 
   try {
+    // Récupération des données météo avec plus de champs
     const res = await fetch(`${meteoApiUrl}/forecast/daily?token=${meteoToken}&insee=${insee}`);
     const data = await res.json();
 
@@ -128,22 +129,30 @@ form.addEventListener("submit", async (e) => {
 
     const checkedInfos = Array.from(form.querySelectorAll('input[name="info"]:checked')).map(i => i.value);
     
-    resultSection.innerHTML = data.forecast.slice(0, days).map(f => {
+    resultSection.innerHTML = data.forecast.slice(0, days).map((f, index) => {
       const date = new Date(f.datetime);
       const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
       const dayName = dayNames[date.getDay()];
       const formattedDate = date.toLocaleDateString("fr-FR");
 
+      // Récupération des données depuis l'API
+      const latitude = data.city?.lat ?? f.latitude ?? "N/A";
+      const longitude = data.city?.lon ?? f.longitude ?? "N/A";
+      const pluie = f.rr10 ?? f.rr1 ?? "0";
+      const vent = f.wind10m ?? f.ffm ?? "N/A";
+      const directionVent = f.dirwind10m ?? f.ddm ?? "N/A";
+      const brouillard = f.probarain ?? f.probafog ?? "0";
+
       let additionalInfo = "";
-      if (checkedInfos.includes("lat")) additionalInfo += `<p><strong>Latitude:</strong> ${f.lat?.toFixed(4) || "N/A"}</p>`;
-      if (checkedInfos.includes("lon")) additionalInfo += `<p><strong>Longitude:</strong> ${f.lon?.toFixed(4) || "N/A"}</p>`;
-      if (checkedInfos.includes("rain")) additionalInfo += `<p><strong>Pluie:</strong> ${f.rr10 || "0"} mm</p>`;
-      if (checkedInfos.includes("wind")) additionalInfo += `<p><strong>Vent:</strong> ${f.wind10m || "N/A"} km/h</p>`;
-      if (checkedInfos.includes("dir")) additionalInfo += `<p><strong>Direction vent:</strong> ${f.dirwind10m || "N/A"}°</p>`;
-      if (checkedInfos.includes("fog")) additionalInfo += `<p><strong>Brouillard:</strong> ${f.probarain || "0"}%</p>`;
+      if (checkedInfos.includes("lat")) additionalInfo += `<p><strong>Latitude:</strong> ${typeof latitude === 'number' ? latitude.toFixed(4) : latitude}</p>`;
+      if (checkedInfos.includes("lon")) additionalInfo += `<p><strong>Longitude:</strong> ${typeof longitude === 'number' ? longitude.toFixed(4) : longitude}</p>`;
+      if (checkedInfos.includes("rain")) additionalInfo += `<p><strong>Pluie:</strong> ${pluie} mm</p>`;
+      if (checkedInfos.includes("wind")) additionalInfo += `<p><strong>Vent moyen:</strong> ${vent} km/h</p>`;
+      if (checkedInfos.includes("dir")) additionalInfo += `<p><strong>Direction vent:</strong> ${directionVent}°</p>`;
+      if (checkedInfos.includes("fog")) additionalInfo += `<p><strong>Brouillard:</strong> ${brouillard}%</p>`;
 
       return `
-        <div class="weather-card" style="animation-delay: ${Math.random() * 0.3}s">
+        <div class="weather-card" style="animation-delay: ${index * 0.1}s">
           <h3>${cityName} - ${dayName} ${formattedDate}</h3>
           <img src="${getLocalWeatherImage(f.weather)}" alt="Météo: ${f.weather}" class="weather-image" />
           <div class="temps">
