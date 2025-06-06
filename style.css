@@ -82,13 +82,20 @@ select {
 }
 
 fieldset {
-  border: 1px solid #94a3b8;
-  border-radius: 10px;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 15px;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+legend {
+  padding: 0 0.5rem;
+  color: var(--accent-color);
+  font-size: 1rem;
 }
 
 .info-group {
@@ -96,6 +103,68 @@ fieldset {
   flex-direction: column;
   min-width: 140px;
   gap: 0.25rem;
+}
+
+/* Styles améliorés pour les cases à cocher */
+.info-group input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.info-group label {
+  position: relative;
+  padding-left: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.info-group label:hover {
+  color: var(--accent-color);
+}
+
+.info-group label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.info-group label::after {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  top: 0.45rem;
+  width: 0.5rem;
+  height: 0.9rem;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.info-group input[type="checkbox"]:checked + label::before {
+  background: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+}
+
+.info-group input[type="checkbox"]:checked + label::after {
+  opacity: 1;
+}
+
+.info-group input[type="checkbox"]:focus + label::before {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.5);
 }
 
 .days-slider-container {
@@ -318,6 +387,17 @@ body.dark.background fieldset {
   animation: propulsion 0.8s ease infinite;
 }
 
+/* Animation pour les cases à cocher */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.info-group input[type="checkbox"]:checked + label::before {
+  animation: pulse 0.3s ease;
+}
+
 @media (max-width: 768px) {
   main {
     padding: 1.5rem;
@@ -335,6 +415,11 @@ body.dark.background fieldset {
   .days-slider-container button {
     width: 100%;
     border-radius: 10px;
+  }
+
+  fieldset {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 
