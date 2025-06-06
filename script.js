@@ -88,10 +88,19 @@ cityInput.addEventListener("input", () => {
   }, 300);
 });
 
-// Fonction pour obtenir l'image météo
+// Fonction pour obtenir l'image météo (version améliorée)
 function getLocalWeatherImage(code) {
-  if ([0, 1].includes(code)) return "images/sun.jpg";
-  if ([5, 6, 7].includes(code)) return "images/pluie.jpg";
+  // Codes correspondant à la pluie (selon l'API Meteo Concept)
+  if (code >= 10 && code <= 16) return "images/pluie.jpg"; // Pluie faible à forte
+  if (code >= 20 && code <= 22) return "images/pluie.jpg"; // Averses
+  if (code >= 30 && code <= 32) return "images/pluie.jpg"; // Pluie et neige mêlées
+  if (code === 40 || code === 41 || code === 45 || code === 46) return "images/pluie.jpg"; // Brouillard avec pluie
+  if (code >= 60 && code <= 67) return "images/pluie.jpg"; // Orages avec pluie
+  
+  // Ensoleillé
+  if (code === 0 || code === 1) return "images/sun.jpg";
+  
+  // Nuageux par défaut
   return "images/nuage.jpg";
 }
 
